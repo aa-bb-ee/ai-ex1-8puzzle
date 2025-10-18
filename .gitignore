@@ -205,3 +205,9 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+# Custom ignores for AI_Task1 project
+.DS_Store
+.idea/
+results_8puzzle.csv
