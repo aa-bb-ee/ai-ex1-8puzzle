@@ -1,4 +1,13 @@
-import copy
+import os, sys, subprocess
+
+def open_file(path: str):
+    """Open a file with the default app (works for .gif, .webp, .png, etc.)."""
+    if sys.platform.startswith("darwin"):
+        subprocess.Popen(["open", path])          # macOS
+    elif os.name == "nt":
+        os.startfile(path)                        # Windows
+    else:
+        subprocess.Popen(["xdg-open", path])
 
 def format_board(board):
     """Return a nicely formatted 3x3 board as a string (0 shown as blank)."""
@@ -49,6 +58,15 @@ class PuzzleState:
 
 
 if __name__ == "__main__":
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    gif_path = os.path.join(BASE_DIR, "experiments", "giphy.webp")
+    if os.path.exists(gif_path):
+        print(f"\nSmall surprise - me doing this task:")
+        open_file(gif_path)
+    else:
+        print(f"\n(No GIF found at {gif_path}. Put your file there to auto-open.)")
+
+
     # quick demo: generate neighbors from a simple state
     s = PuzzleState([1, 2, 3,
                      4, 0, 5,
