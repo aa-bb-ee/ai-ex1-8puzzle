@@ -211,3 +211,5 @@ __marimo__/
 .DS_Store
 .idea/
 results_8puzzle.csv
+benchmark_results.csv
+*.csv
