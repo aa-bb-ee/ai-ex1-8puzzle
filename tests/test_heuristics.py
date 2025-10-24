@@ -21,19 +21,21 @@ def test_if_correct_order_goal_state_has_zero_cost_with_hamming_and_manhattan():
 
 
 def test_if_single_swap_adjacent_to_blank_goal_state_has_one_cost():
-    # Swap the blank (index 8) with tile 8 (index 7) -> one move away
-    start = [1, 2, 3,
-             4, 5, 6,
-             7, 0, 8]
-    assert hamming_distance(start, GOAL_STATE) == 1
-    assert manhattan_distance(start, GOAL_STATE) == 1
+    # Swap the blank (0) with tile 1 -> one move away from goal
+    start = [0, 1, 2,
+             3, 5, 4,
+             6, 7, 8]
+    # Hamming counts both misplaced tiles
+    assert hamming_distance(start, GOAL_STATE) == 2
+    # Manhattan sums both distances (1 + 1)
+    assert manhattan_distance(start, GOAL_STATE) == 2
 
 
 def test_if_two_swaps_adjacent_to_blank_goal_state_has_two_costs():
-    # Two tiles (5 and 6) are misplaced by one column each
-    start = [1, 2, 3,
-             4, 6, 5,
-             7, 8, 0]
+    # Two tiles (4 and 5) are swapped — each one column away
+    start = [0, 1, 2,
+             3, 5, 4,
+             6, 7, 8]
     # Hamming counts misplaced tiles (5 and 6) => 2
     assert hamming_distance(start, GOAL_STATE) == 2
     # Manhattan: 5 is one step from col 1 to col 2, 6 is one step back => 1 + 1 = 2
@@ -41,38 +43,38 @@ def test_if_two_swaps_adjacent_to_blank_goal_state_has_two_costs():
 
 
 def test_tile_far_from_goal_corner_case():
-    # Tile 1 is in bottom-right corner; goal wants it at index 1
-    start = [0, 2, 3,
-             4, 5, 6,
-             7, 8, 1]
-    # Hamming: only tile 1 is misplaced (blank ignored) => 1
-    assert hamming_distance(start, GOAL_STATE) == 1
-    # Manhattan for tile 1: from (2,2) to (0,0) => |2-0| + |2-0| = 4
-    assert manhattan_distance(start, GOAL_STATE) == 4
+    # Tile 1 is in the bottom-right corner instead of top-left (goal position)
+    # Tile 8 is swapped with it
+    start = [0, 8, 2,
+             3, 4, 5,
+             6, 7, 1]
+    # Hamming: tiles 1 and 8 are misplaced
+    assert hamming_distance(start, GOAL_STATE) == 2
+    # Manhattan: 1 moves from (2,2) -> (0,1) = 3; 8 moves from (0,1) -> (2,2) = 3 → total = 6
+    assert manhattan_distance(start, GOAL_STATE) == 6
 
 
 def test_blank_is_ignored():
-    # Only blank moved; all numbered tiles are correct
+    # Only blank moved; the swapped numbered tile is counted, not the blank
     start = [1, 0, 2,
              3, 4, 5,
              6, 7, 8]
-    assert hamming_distance(start, GOAL_STATE) == 0
-    assert manhattan_distance(start, GOAL_STATE) == 0
-
+    # Tile 1 is misplaced, blank ignored
+    assert hamming_distance(start, GOAL_STATE) == 1
+    assert manhattan_distance(start, GOAL_STATE) == 1
 
 
 def test_compute_h_selector():
-    start = [1, 2, 3,
-             4, 0, 6,
-             7, 5, 8]
-    # Hamming: tiles 5 and 8 are misplaced => 2
+    # Ensure compute_h correctly delegates to both heuristics
+    start = [0, 1, 2,
+             3, 5, 4,
+             6, 7, 8]
     assert compute_h(start, GOAL_STATE, "hamming") == 2
-    # Manhattan: 5 is 1 step down-right, 8 is 1 step right/up relative to blank location -> total 2
     assert compute_h(start, GOAL_STATE, "manhattan") == 2
 
 
 def test_manhattan_dominates_hamming_on_various_states():
-    """For random permutations (not necessarily all solvable), Manhattan >= Hamming."""
+    """For random permutations (not necessarily solvable), Manhattan ≥ Hamming."""
     for _ in range(100):
         state = list(range(9))
         random.shuffle(state)
@@ -82,16 +84,11 @@ def test_manhattan_dominates_hamming_on_various_states():
 
 
 def test_multiple_misplacements_manhattan_adds_up():
-    # Move 7 and 8 to the second row, blank to bottom-left
-    start = [1, 2, 3,
-             4, 7, 8,
-             0, 5, 6]
-    # Hamming: tiles 5,6,7,8 are misplaced => 4
+    # Several tiles are misplaced; Manhattan should accumulate their distances
+    start = [0, 1, 2,
+             7, 8, 5,
+             6, 4, 3]
+    # Hamming: tiles 4, 5, 7, 8 are misplaced
     assert hamming_distance(start, GOAL_STATE) == 4
-    # Manhattan distances:
-    # 5: from (2,1) -> (1,1): 1
-    # 6: from (2,2) -> (1,2): 1
-    # 7: from (1,1) -> (2,0): |1-2| + |1-0| = 2
-    # 8: from (1,2) -> (2,1): |1-2| + |2-1| = 2
-    # total = 1 + 1 + 2 + 2 = 6
-    assert manhattan_distance(start, GOAL_STATE) == 6
+    # Manhattan: total distance = 8
+    assert manhattan_distance(start, GOAL_STATE) == 8
