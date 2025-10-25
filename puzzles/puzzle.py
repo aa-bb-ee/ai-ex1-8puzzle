@@ -10,10 +10,21 @@ def open_file(path: str):
         subprocess.Popen(["xdg-open", path])
 
 def format_board(board):
-    """Return a nicely formatted 3x3 board as a string (0 shown as blank)."""
+    """Return a nicely formatted 3x3 board as a string with emojis (0 shown as blank circle)."""
+    num_to_emoji = {
+        0: '⚫',
+        1: '1️⃣',
+        2: '2️⃣',
+        3: '3️⃣',
+        4: '4️⃣',
+        5: '5️⃣',
+        6: '6️⃣',
+        7: '7️⃣',
+        8: '8️⃣',
+    }
     rows = []
     for i in range(0, 9, 3):
-        row = [(' ' if x == 0 else str(x)) for x in board[i:i+3]]
+        row = [num_to_emoji[x] for x in board[i:i+3]]
         rows.append(' '.join(row))
     return '\n'.join(rows)
 
