@@ -1,3 +1,7 @@
+# Benchmark results
+results/
+benchmark_results*.csv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -211,3 +215,5 @@ __marimo__/
 .DS_Store
 .idea/
 results_8puzzle.csv
+benchmark_results.csv
+*.csv
