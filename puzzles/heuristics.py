@@ -31,10 +31,10 @@ def manhattan_distance(board, goal):
     """
     distance = 0
     for i, tile in enumerate(board):
-        if tile != 0:
+        if tile != 0:  # skip the blank
             goal_index = goal.index(tile)
-            x1, y1 = divmod(i, 3)
-            x2, y2 = divmod(goal_index, 3)
+            x1, y1 = divmod(i, 3)   # current row/col
+            x2, y2 = divmod(goal_index, 3)  # goal row/col
             distance += abs(x1 - x2) + abs(y1 - y2)
     return distance
 

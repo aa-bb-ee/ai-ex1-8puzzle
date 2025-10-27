@@ -8,6 +8,7 @@ from puzzles.puzzle import format_board, PuzzleState
 
 class TestFormatBoardEmoji:
     def test_format_board_returns_correct_emojis(self):
+        """format_board should map numbers→emoji and show 0 as ⚫."""
         board = [
             1, 2, 3,
             4, 0, 5,
@@ -22,6 +23,7 @@ class TestFormatBoardEmoji:
         assert s == expected
 
     def test_str_returns_same_as_format_board(self):
+        """PuzzleState.__str__ should delegate to format_board(board)."""
         board = [
             1, 2, 3,
             4, 0, 5,
@@ -92,6 +94,7 @@ class TestNeighbors:
 
 class TestEqualityAndOrdering:
     def test_equality_and_hash(self):
+        """States with identical boards are equal and hash-identical."""
         a = PuzzleState([1, 2, 3, 4, 0, 5, 6, 7, 8])
         b = PuzzleState([1, 2, 3, 4, 0, 5, 6, 7, 8])
         c = PuzzleState([1, 2, 3, 4, 5, 0, 6, 7, 8])
@@ -102,6 +105,7 @@ class TestEqualityAndOrdering:
         assert hash(a) != hash(c)
 
     def test_lt_compares_f_values(self):
+        """__lt__ should order states by f = g + h (useful for priority queues)."""
         a = PuzzleState([1, 2, 3, 4, 0, 5, 6, 7, 8], g=1, h=2)  # f = 3
         b = PuzzleState([1, 2, 3, 4, 0, 5, 6, 7, 8], g=2, h=2)  # f = 4
         assert a < b

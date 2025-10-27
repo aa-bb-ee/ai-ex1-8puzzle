@@ -3,17 +3,11 @@ import time
 from puzzles.config import GOAL_STATE
 from puzzles.helpers import generate_random_board
 from puzzles.heuristics import compute_h
-from puzzles.puzzle import PuzzleState, open_file
+from puzzles.puzzle import PuzzleState
 from puzzles.search import a_star_search
 
 def main():
-    # Optional: Open GIF if it exists
-    gif_path = os.path.join("experiments", "giphy.webp")
-    if os.path.exists(gif_path):
-        print("\n🎬 Opening GIF for fun...")
-        open_file(gif_path)
-    else:
-        print("\n(No GIF found. Put 'giphy.webp' in 'experiments/' to auto-open.)")
+    """Run a single A* solve on a random solvable 8-puzzle board and print results."""
 
     # Generate a random solvable board
     start_board = generate_random_board()
@@ -30,6 +24,7 @@ def main():
 
     print(f"\n🔎 Solving with A* using the {heuristic_method} heuristic...")
 
+    # Time the search
     start_time = time.time()
     solution_path, expanded_nodes = a_star_search(start_state, GOAL_STATE, heuristic_method)
     end_time = time.time()
