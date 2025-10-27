@@ -60,6 +60,13 @@ python -m venv venv
 venv\Scripts\activate
 </pre>
 
+**Git Bash**
+
+<pre>
+python3 -m venv venv
+source venv/Scripts/activate
+</pre>
+
 If successful, your terminal will show:
 <pre> 
 (venv) ... 
