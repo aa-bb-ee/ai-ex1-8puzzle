@@ -13,24 +13,27 @@ The goal is to evaluate both heuristics in terms of **memory usage** (expanded n
 ## Project Structure
 
 <pre>
-AI_Task1/
-│
-├── puzzles/               # Core puzzle logic
-│   ├── puzzle.py          # State, neighbors, solvability check
-│   ├── heuristics.py      # Hamming and Manhattan heuristics
-│   └── search.py          # A* algorithm
-│
-├── experiments/           # Benchmark and performance comparison
-│   └── benchmark.py
-│
-├── tests/                 # Unit tests (pytest)
-│   ├── test_puzzle.py
-│   ├── test_search.py
-│   └── test_heuristics.py
-│
-├── main.py                # Entry point
-├── requirements.txt       # Dependencies
-└── README.md              # Documentation
+  AI_Task1/
+  │
+  ├── puzzles/               # Core puzzle logic
+  │   ├── config.py          # Puzzle goal state
+  │   ├── helpers.py         # Solvability check, generate random board
+  │   ├── puzzle.py          # State, neighbors
+  │   ├── heuristics.py      # Hamming and Manhattan heuristics
+  │   └── search.py          # A* algorithm
+  │
+  ├── experiments/           # Benchmark and performance comparison
+  │   └── benchmark.py
+  │
+  ├── tests/                 # Unit tests
+  │   ├── test_benchmark.py
+  │   ├── test_puzzle.py
+  │   ├── test_search.py
+  │   └── test_heuristics.py
+  │
+  ├── main.py                # Entry point
+  ├── requirements.txt       # Dependencies
+  └── README.md              # Documentation
 </pre>
 
 
