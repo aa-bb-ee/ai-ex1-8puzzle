@@ -64,31 +64,38 @@ def run_benchmark(n=100, save_csv=True, out_dir="results"):
         "manhattan": {"moves": [], "nodes": [], "times": []}
     }
 
-    if save_csv:
-        with open(runs_path, "w", newline="") as f:
-            writer = csv.writer(f)
+    # Experimente immer ausführen, CSV optional speichern
+    for heuristic in ["hamming", "manhattan"]:
+        print(f"\n{'=' * 70}")
+        print(f"Running {n} experiments with '{heuristic}' heuristic")
+        print('=' * 70)
+
+        # Öffne CSV-Datei nur, wenn speichern aktiviert ist
+        csv_file = open(runs_path, "w", newline="") if save_csv else None
+        writer = csv.writer(csv_file) if save_csv else None
+        if save_csv:
             writer.writerow(["heuristic", "run", "moves", "nodes_expanded", "runtime_seconds"])
 
-            for heuristic in ["hamming", "manhattan"]:
-                print(f"\n{'=' * 70}")
-                print(f"Running {n} experiments with '{heuristic}' heuristic")
-                print('=' * 70)
+        for i, board in enumerate(boards):
+            moves, nodes, runtime = run_single_experiment(board, heuristic)
+            results[heuristic]["moves"].append(moves)
+            results[heuristic]["nodes"].append(nodes)
+            results[heuristic]["times"].append(runtime)
 
-                for i, board in enumerate(boards):  # Use same boards
-                    moves, nodes, runtime = run_single_experiment(board, heuristic)
-                    results[heuristic]["moves"].append(moves)
-                    results[heuristic]["nodes"].append(nodes)
-                    results[heuristic]["times"].append(runtime)
+            if save_csv:
+                writer.writerow([heuristic, i + 1, moves, nodes, f"{runtime:.6f}"])
 
-                    writer.writerow([heuristic, i + 1, moves, nodes, f"{runtime:.6f}"])
-                    print(
-                        f"Run #{i + 1:3}: "
-                        f"moves={moves:2}, "
-                        f"nodes_expanded={nodes:4}, "
-                        f"runtime={runtime:.4f}s"
-                    )
+            print(
+                f"Run #{i + 1:3}: "
+                f"moves={moves:2}, "
+                f"nodes_expanded={nodes:4}, "
+                f"runtime={runtime:.4f}s"
+            )
 
-                print_summary(heuristic, results[heuristic], n)
+        print_summary(heuristic, results[heuristic], n)
+
+        if save_csv:
+            csv_file.close()
 
     # Save summary
     if save_csv:
@@ -115,7 +122,6 @@ def run_benchmark(n=100, save_csv=True, out_dir="results"):
         print(f"✅ Statistical summary:  {summary_path}\n{'=' * 70}")
 
     return results
-
 
 if __name__ == "__main__":
     run_benchmark(n=100, save_csv=True)
