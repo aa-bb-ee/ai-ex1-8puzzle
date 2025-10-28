@@ -1,11 +1,16 @@
 import heapq
-
+import itertools
 from puzzles.heuristics import compute_h
 
 
 def a_star_search(start_state, goal_state, heuristic_method):
     """
     Perform A* search algorithm to solve the 8-Puzzle.
+
+    Tie-breaking priority:
+      1. Lower f = g + h
+      2. Lower h (closer to goal)
+      3. Earlier insertion (FIFO)
 
     Parameters:
     - start_state: PuzzleState object representing start configuration
@@ -17,57 +22,59 @@ def a_star_search(start_state, goal_state, heuristic_method):
     - explored_count: int, number of states expanded during search
     """
 
-    # Priority queue for frontier, initialized with start state
-    # Elements are tuples of (f, PuzzleState). heapq ensures lowest f is poped first
-    frontier = []
-    heapq.heappush(frontier, (start_state.f, start_state))
+    # ---
+    # Initialization
+    # ---
+    counter = itertools.count()  # unique incremental tie-break counter
+    frontier = []  # heap-based priority queue
+    explored = set()  # to avoid revisiting states
 
-    # Explored set to keep track of visited states to avoid repeats
-    explored = set()
+    # Initialize start state's heuristic values
+    start_state.h = compute_h(start_state.board, goal_state, heuristic_method)
+    start_state.f = start_state.g + start_state.h
 
-    # For statistics: how many states have been expanded
+    # Push start node into frontier with tie-breaking tuple
+    heapq.heappush(frontier, (start_state.f, start_state.h, next(counter), start_state))
     explored_count = 0
 
+    # ---
+    # A* Main Loop
+    # ---
     while frontier:
-        # Get the state with lowest f = g + h
-        current_f, current_state = heapq.heappop(frontier)
+        # Pop node with lowest (f, h, order)
+        _, _, _, current_state = heapq.heappop(frontier)
 
-        # Check if goal reached
+        # Goal test
         if current_state.board == goal_state:
-            # Reconstruct the path by following parents (if you store them),
-            # or just return current_state for now
             return reconstruct_path(current_state), explored_count
 
-        # Mark current state as explored
+        # Skip if already expanded
+        if current_state in explored:
+            continue
         explored.add(current_state)
+
+        explored_count += 1
 
         # Expand neighbors (possible moves)
         for neighbor in current_state.neighbors():
             if neighbor in explored:
                 continue
 
-            # Calculate heuristic h for neighbor
+            # Compute heuristic, g, f
             neighbor.h = compute_h(neighbor.board, goal_state, heuristic_method)
-
-            # g = cost so far (moves from start), increase by 1 per step
             neighbor.g = current_state.g + 1
-
-            # f = g + h
             neighbor.f = neighbor.g + neighbor.h
-
-            # Store parent to reconstruct path later
             neighbor.parent = current_state
 
-            # Add neighbor to frontier for further exploration
-            heapq.heappush(frontier, (neighbor.f, neighbor))
+            # Push with deterministic tie-breaking
+            heapq.heappush(frontier, (neighbor.f, neighbor.h, next(counter), neighbor))
 
-        explored_count += 1
-
-    # If no solution found
+    # If frontier empty and no goal found
     return None, explored_count
 
+
 def reconstruct_path(state):
-    """Helper function to reconstruct the solution path from goal to start."""
+    """Reconstruct the solution path by following parent links."""
     path = []
     while state:
         path.append(state)

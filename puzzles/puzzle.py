@@ -69,8 +69,10 @@ class PuzzleState:
         return hash(tuple(self.board))
 
     # __lt__ lets heapq/PriorityQueue break ties using f (useful for A*)
-    def __lt__(self, other):
-        return self.f < other.f
+    # not used anymore in more advanced A* tie-break mode
+    # def __lt__(self, other):
+    #    return self.f < other.
+
 
     def __str__(self):
         """Pretty-print when you do print(state)."""

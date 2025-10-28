@@ -104,9 +104,4 @@ class TestEqualityAndOrdering:
         assert a != c
         assert hash(a) != hash(c)
 
-    def test_lt_compares_f_values(self):
-        """__lt__ should order states by f = g + h (useful for priority queues)."""
-        a = PuzzleState([1, 2, 3, 4, 0, 5, 6, 7, 8], g=1, h=2)  # f = 3
-        b = PuzzleState([1, 2, 3, 4, 0, 5, 6, 7, 8], g=2, h=2)  # f = 4
-        assert a < b
-        assert not b < a
+
