@@ -8,6 +8,9 @@ from puzzles.puzzle import PuzzleState
 from puzzles.search import a_star_search
 
 
+# ---------------------------------------------------------
+# Run a single A* search experiment on a given puzzle board
+# ---------------------------------------------------------
 def run_single_experiment(start_board, heuristic_method):
     start_state = PuzzleState(start_board)
     start_state.h = compute_h(start_board, GOAL_STATE, heuristic_method)
@@ -22,6 +25,9 @@ def run_single_experiment(start_board, heuristic_method):
     return moves, expanded_nodes, runtime, solution_path
 
 
+# ---------------------------------------------------------
+# Print mean and standard deviation of benchmark results
+# ---------------------------------------------------------
 def print_summary(heuristic, results, n):
     moves_mean = statistics.mean(results["moves"])
     moves_std = statistics.stdev(results["moves"]) if len(results["moves"]) > 1 else 0.0
@@ -39,6 +45,9 @@ def print_summary(heuristic, results, n):
     print(f"Standard deviation of runtime (seconds):   {time_std:.4f}")
 
 
+# ---------------------------------------------------------
+# Option 1: Solve a single random puzzle using both heuristics
+# ---------------------------------------------------------
 def option_1_solve_puzzle():
     print("\n🧩 Generating random solvable puzzle...")
     board = generate_random_board()
@@ -51,19 +60,20 @@ def option_1_solve_puzzle():
 
     results = {}
 
+    # Run both Manhattan and Hamming heuristics on the same puzzle
     for heuristic in ["manhattan", "hamming"]:
         moves, nodes, runtime, solution_path = run_single_experiment(board, heuristic)
         results[heuristic] = {"moves": moves, "nodes": nodes, "runtime": runtime, "path": solution_path}
         print(f"\n✅ {heuristic.capitalize()} heuristic solved: {moves} moves, {nodes} nodes expanded, {runtime:.4f}s")
 
-    # Vergleichstabelle
+    # Display comparison table
     print("\n📊 Comparison Table:")
     print(f"{'Heuristic':<10} {'Moves':<6} {'Nodes':<6} {'Runtime (s)':<10}")
     for heuristic in ["manhattan", "hamming"]:
         r = results[heuristic]
         print(f"{heuristic:<10} {r['moves']:<6} {r['nodes']:<6} {r['runtime']:<10.4f}")
 
-    # Optional: Lösungsweg nur einmal pro Heuristik
+    # Optionally show full solution paths
     show_path = input("\nShow solution paths? (y/n): ").strip().lower()
     if show_path == "y":
         for heuristic in ["manhattan", "hamming"]:
@@ -73,15 +83,18 @@ def option_1_solve_puzzle():
                 print(state)
 
 
+# ---------------------------------------------------------
+# Option 2: Run benchmark over multiple random puzzles
+# ---------------------------------------------------------
 def option_2_benchmark(n_runs=100):
     print(f"\n🏁 Running benchmark with {n_runs} puzzles...")
     results = {"manhattan": {"moves": [], "nodes": [], "times": []},
                "hamming": {"moves": [], "nodes": [], "times": []}}
 
-    # Zufallsboards einmal generieren
+    # Generate all random boards once for fair comparison
     boards = [generate_random_board() for _ in range(n_runs)]
 
-    # Alle Experimente
+    # Run each heuristic on all generated boards
     for heuristic in ["manhattan", "hamming"]:
         for i, board in enumerate(boards, start=1):
             moves, nodes, runtime, _ = run_single_experiment(board, heuristic)
@@ -90,7 +103,7 @@ def option_2_benchmark(n_runs=100):
             results[heuristic]["times"].append(runtime)
             print(f"[{heuristic}] Run #{i}: moves={moves}, nodes={nodes}, time={runtime:.4f}s")
 
-    # Vergleichstabelle
+    # Display benchmark statistics table
     print("\n📊 Benchmark Comparison Table:")
     header = f"{'Heuristic':<10} | {'Mean Moves':<10} | {'Std Moves':<9} | {'Mean Nodes':<10} | {'Std Nodes':<9} | {'Mean Runtime (s)':<15} | {'Std Runtime (s)':<15}"
     print(header)
@@ -109,23 +122,18 @@ def option_2_benchmark(n_runs=100):
               f"{nodes_mean:<10.2f} | {nodes_std:<9.2f} | {time_mean:<15.4f} | {time_std:<15.4f}")
 
 
-
+# ---------------------------------------------------------
+# Option 3: Visualize and explain A* tie-breaking mechanism
+# ---------------------------------------------------------
 def option_3_tiebreak_demo():
     """Demonstrate tie-breaks in A* with visualization and user interaction."""
     import heapq, itertools
 
+    # Helper: display board as emoji string for compact visualization
     def board_to_line_emoji(board):
-        """Return the board as a single line string using emojis (0 = ⚫)."""
         num_to_emoji = {
-            0: '⚫',
-            1: '1️⃣',
-            2: '2️⃣',
-            3: '3️⃣',
-            4: '4️⃣',
-            5: '5️⃣',
-            6: '6️⃣',
-            7: '7️⃣',
-            8: '8️⃣',
+            0: '⚫', 1: '1️⃣', 2: '2️⃣', 3: '3️⃣', 4: '4️⃣',
+            5: '5️⃣', 6: '6️⃣', 7: '7️⃣', 8: '8️⃣'
         }
         return ''.join(num_to_emoji[x] for x in board)
 
@@ -139,13 +147,15 @@ def option_3_tiebreak_demo():
     print(start_state)
     print("\n🔎 Solving while monitoring tie-breaks...")
 
+    # Priority queue (min-heap) with tie-breaker counter
     frontier = []
     counter = itertools.count()
     heapq.heappush(frontier, (start_state.f, start_state.h, next(counter), start_state))
     explored = set()
 
+    # A* main loop (with detailed tie-break visualization)
     while frontier:
-        # Prüfen auf Gleichstand (f-Wert)
+        # Detect ties (nodes with same f-value)
         f_top = frontier[0][0]
         tie_nodes = [(f, h, c, n) for f, h, c, n in frontier if f == f_top]
 
@@ -154,22 +164,22 @@ def option_3_tiebreak_demo():
             for f, h, c, node in tie_nodes:
                 print(f"{board_to_line_emoji(node.board)} [f={f}, h={h}, count={c}]")
 
-            # Heap wählt automatisch: min h, dann FIFO
+            # Select node by smallest h, then FIFO (earliest count)
             selected = min(tie_nodes, key=lambda x: (x[1], x[2]))
             print(f"\n➡ Selected node: {board_to_line_emoji(selected[3].board)} [f={selected[0]}, h={selected[1]}, count={selected[2]}]")
             print("Reason: smallest h, then earliest inserted (FIFO)")
 
-            # Benutzer fragen, ob weitere Ties angezeigt werden sollen
+            # Ask user whether to continue or stop demonstration
             cont = input("\nShow next tie-breaks? (y/n): ").strip().lower()
             if cont != "y":
                 print("Aborting tie-break demonstration.")
                 break
 
-        # Nächsten Knoten aus der Open-Liste nehmen
+        # Expand next node
         _, _, _, current = heapq.heappop(frontier)
 
+        # If goal reached → reconstruct full path
         if current.board == GOAL_STATE:
-            # Lösung rekonstruieren
             path = []
             while current:
                 path.append(current)
@@ -181,42 +191,52 @@ def option_3_tiebreak_demo():
                 print(f"\nStep {step}: {state}")
             break
 
+        # Expand neighbors and push to heap
         explored.add(current)
         for neighbor in current.neighbors():
             if neighbor in explored:
                 continue
-            neighbor.h = compute_h(neighbor.board, GOAL_STATE, "manhattan")
+            neighbor.h = compute_h(neighbor.board, GOAL_STATE, "hamming")
             neighbor.g = current.g + 1
             neighbor.f = neighbor.g + neighbor.h
             neighbor.parent = current
             heapq.heappush(frontier, (neighbor.f, neighbor.h, next(counter), neighbor))
 
 
-
-
+# ---------------------------------------------------------
+# Interactive main menu for user interaction
+# ---------------------------------------------------------
 def main_menu():
     while True:
-        print("\n================ A* 8-Puzzle Menu ================")
-        print("1. Solve a single puzzle (Hamming & Manhattan)")
-        print("2. Run benchmark")
-        print("3. Demonstrate tie-break")
-        print("0. Exit")
-        choice = input("Enter your choice (0-3): ").strip()
+        print("\n" + "=" * 55)
+        print("🎯  A* 8-Puzzle Interactive Menu")
+        print("=" * 55)
+        print("1️⃣  Solve a random puzzle using both heuristics")
+        print("2️⃣  Run benchmark comparison")
+        print("3️⃣  Demonstrate A* tie-breaking")
+        print("0️⃣  Exit program")
+        print("=" * 55)
 
+        choice = input("⌨️  Enter your choice (0–3): ").strip()
+
+        # Handle user menu choices
         if choice == "1":
             option_1_solve_puzzle()
         elif choice == "2":
-            n = input("Enter number of benchmark runs (default 100): ").strip()
+            n = input("📊  Number of benchmark runs (default 100): ").strip()
             n_runs = int(n) if n.isdigit() else 100
             option_2_benchmark(n_runs)
         elif choice == "3":
             option_3_tiebreak_demo()
         elif choice == "0":
-            print("Exiting...")
+            print("\nExiting program. Goodbye!\n")
             break
         else:
-            print("Invalid choice. Please enter 0-3.")
+            print("\n⚠️  Invalid choice! Please enter a number between 0 and 3.")
 
 
+# ---------------------------------------------------------
+# Entry point
+# ---------------------------------------------------------
 if __name__ == "__main__":
     main_menu()
